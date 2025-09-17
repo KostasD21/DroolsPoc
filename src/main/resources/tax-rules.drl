@@ -1,0 +1,32 @@
+package com.ferry.rules
+
+import com.example.drools_poc.TaxResult;
+import com.example.drools_poc.Reservation;
+
+rule "Inbound Tax for Port A"
+    when
+        $r : Reservation(port == "PortA", direction == "INBOUND")
+    then
+        TaxResult result = new TaxResult($r.getPort(), $r.getDirection(), 0.10); // 10% tax
+        insert(result);
+        System.out.println("Applied inbound tax for PortA: 10%");
+end
+
+rule "Outbound Tax for Port A"
+    when
+        $r : Reservation(port == "PortA", direction == "OUTBOUND")
+    then
+        TaxResult result = new TaxResult($r.getPort(), $r.getDirection(), 0.05); // 5% tax
+        insert(result);
+        System.out.println("Applied outbound tax for PortA: 5%");
+end
+
+rule "Default Tax"
+    when
+        $r : Reservation()
+        not TaxResult(port == $r.getPort(), direction == $r.getDirection())
+    then
+        TaxResult result = new TaxResult($r.getPort(), $r.getDirection(), 0.15); // fallback: 15%
+        insert(result);
+        System.out.println("Applied default tax: 15%");
+end
