@@ -1,0 +1,8 @@
+id,expression,taxRate
+1,port == 'PortA' && direction == 'INBOUND' && travelDate.monthValue >= 6 && travelDate.monthValue <= 8,0.12
+2,port == 'PortA' && direction == 'INBOUND' && (travelDate.monthValue == 12 || travelDate.monthValue == 11 || travelDate.monthValue == 1 || travelDate.monthValue == 2 || travelDate.monthValue == 3),0.08
+3,port == 'PortA' && direction == 'OUTBOUND',0.05
+4,port == 'PortB' && direction == 'INBOUND',0.09
+5,port == 'PortB' && direction == 'OUTBOUND',0.12
+6,port == 'PortA',0.15
+7,port == 'PortB',0.11
