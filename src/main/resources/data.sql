@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS TAX_RULE_XML
+(
+    id serial PRIMARY KEY,
+    xml_content CLOB NOT NULL
+);
