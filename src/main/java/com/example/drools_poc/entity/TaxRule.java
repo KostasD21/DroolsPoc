@@ -9,6 +9,8 @@ public class TaxRule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Lob
+    @Column(name = "xml_content")
     private String xmlContent;
 
     public TaxRule(String xmlContent) {

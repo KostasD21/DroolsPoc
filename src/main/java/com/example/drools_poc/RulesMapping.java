@@ -5,6 +5,7 @@ import java.util.List;
 public class RulesMapping {
     private List<Rule> rules;
     private Model model;
+    private HitPolicy hitPolicy;
 
     public RulesMapping() {}
 
@@ -22,11 +23,27 @@ public class RulesMapping {
     public void setModel(Model model) {
         this.model = model;
     }
+
+    public HitPolicy getHitPolicy() {
+        return hitPolicy;
+    }
+
+    public void setHitPolicy(HitPolicy hitPolicy) {
+        this.hitPolicy = hitPolicy;
+    }
 }
 
 enum Model {
     DMN,
     DRL
+}
+
+enum HitPolicy {
+    FIRST,
+    PRIORITY,
+    ANY,
+    UNIQUE,
+    COLLECT
 }
 
 class Rule {
