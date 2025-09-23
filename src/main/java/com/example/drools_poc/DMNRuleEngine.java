@@ -4,16 +4,13 @@ import org.kie.api.KieServices;
 import org.kie.api.builder.KieBuilder;
 import org.kie.api.builder.KieFileSystem;
 import org.kie.api.runtime.KieContainer;
-import org.kie.api.runtime.KieRuntimeFactory;
 import org.kie.dmn.api.core.DMNContext;
 import org.kie.dmn.api.core.DMNModel;
 import org.kie.dmn.api.core.DMNResult;
 import org.kie.dmn.api.core.DMNRuntime;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.example.drools_poc.DMNXmlConverter.constructXMLAndStoreInDb;
 
@@ -29,22 +26,33 @@ public class DMNRuleEngine implements RuleEngine {
     @Override
     public void process(RulesMapping rulesMapping) {
         List<Map<String, String>> totalRules = new ArrayList<>();
+        List<Map<String, Double>> totalResults = new ArrayList<>();
         for (Rule rule : rulesMapping.getRules()) {
-            System.out.println("Rule ID: " + rule.getId());
+            //System.out.println("Rule ID: " + rule.getId());
 
             //One rule from the API can produce multiple smaller rules
             List<Map<String, String>> rulesProduced = RuleFlattener.flattenConditions(rule.getConditions());
             totalRules.addAll(rulesProduced);
 
-//            int rowNum = 1;
-//            for (Map<String, String> row : rulesProduced) {
-//                System.out.println("Row " + rowNum++ + ": " + row + " => " +
-//                        rule.getResult().getEntity() + " = " + rule.getResult().getValue());
-//            }
+            if (rule.getResult().getEntity() != null && rule.getResult().getValue() != null) {
+                Map<String, Double> result = new HashMap<>();
+                result.put(rule.getResult().getEntity(), rule.getResult().getValue());
+                for (Map<String, String> ruleProduced : rulesProduced) {
+                    totalResults.add(result);
+                }
+            }
+
+            int rowNum = 1;
+            for (Map<String, String> row : rulesProduced) {
+                System.out.println("Row " + rowNum++ + ": " + row + " => " +
+                        rule.getResult().getEntity() + " = " + rule.getResult().getValue());
+            }
         }
         String xmlContent = null;
         try {
-            xmlContent = constructXMLAndStoreInDb(rulesMapping);
+            //Old way of processing the rules. When we have OR in the condition of rule, it generates two separate rules in the XML.
+            //String xmlContentNew = constructXMLAndStoreInDb(rulesMapping);
+            xmlContent = constructXMLAndStoreInDb(totalRules, totalResults, rulesMapping.getModel(), rulesMapping.getHitPolicy());
             TaxRule taxRule = new TaxRule(xmlContent);
             taxRuleRepository.save(taxRule);
         } catch (Exception e) {
@@ -71,9 +79,9 @@ public class DMNRuleEngine implements RuleEngine {
 
         // 4. Create context and set input values (like from your DB row)
         DMNContext context = dmnRuntime.newContext();
-        context.set("Port", "Piraeus");
+        context.set("Port", null);
         context.set("Direction", "INBOUND");
-        context.set("CargoType", "Containers");
+        context.set("CargoType", "Ferries");
 
         // 5. Evaluate decision
         DMNResult dmnResult = dmnRuntime.evaluateAll(dmnModel, context);
